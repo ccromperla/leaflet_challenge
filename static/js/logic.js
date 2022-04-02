@@ -43,17 +43,17 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
     // Function to determine plot point color 
     function plotColor(depth) {
         if (depth > 90)
-            return "#fc1c03";
+            return "#bd0026";
         else if (depth > 70)
-            return "#fc5203";
+            return "#f03b20";
         else if (depth > 50)
-            return "#fc9003";
+            return "#fd8d3c";
         else if (depth > 30)
-            return "#fcc203";
+            return "#feb24c";
         else if (depth > 10)
-            return "#fcf803";
+            return "#fed976";
         else
-            return "#98fc03";
+            return "#ffffb2";
     }
 
     // Function that determines the size of the radius 
@@ -83,9 +83,14 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
         pointToLayer: function(feature, latLng) {
             return L.circleMarker(latLng);
         },
-        // Set mar ker style
+        // Set marker style
         style : dataStyle,
         // POPuPS!
+        onEachFeature: function(feature, layer) {
+            layer.bindPopup(`Magnitude: ${feature.properties.mag} <br>
+                            Depth: ${feature.geometry.coordinates[2]} <br>
+                            Location: ${feature.properties.place}`);
+        }
     }).addTo(earthquakes);
 });
 
@@ -100,3 +105,40 @@ let overlays = {
 L.control
     .layers(baseMaps, overlays)
     .addTo(myMap);
+
+// Legend on map 
+let legend = L.control({
+    position: "bottomright"
+});
+
+// Adding properties to the legend
+legend.onAdd = function(myMap) {
+    // Div for legend to appear on the map
+    let div = L.DomUtil.create("div", "info legend"),
+
+    // Set up intervals 
+    intervals = [-10, 10, 30, 50, 70, 90]
+    labels = [];
+
+    // https://leafletjs.com/SlavaUkraini/examples/choropleth/ from here 
+    function getColor(d) {
+        return d > 90 ? '#bd0026' :
+               d > 70 ? '#f03b20' :
+               d > 50 ? '#fd8d3c' :
+               d > 30 ? '#feb24c' :
+               d > 10 ? '#fed976' :
+                        '#ffffb2';
+    }
+
+    // Looping through each interval & color to generate a lable w/ square for each interval 
+    for(var i = 0; i < intervals.length; i ++) {
+        // HTML that sets square for each interval label 
+        div.innerHTML +=
+            '<i style="background:' +getColor(intervals[i] + 1) + '"></i> ' +
+            intervals[i] + (intervals[i + 1] ? '&ndash;' + intervals[i + 1] + '<br>' : '+');
+    }
+    return div;
+};
+
+// Add legend to map 
+legend.addTo(myMap);
