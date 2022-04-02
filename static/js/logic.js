@@ -97,8 +97,29 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
 // Add earthquake layer to the map 
 earthquakes.addTo(myMap);
 
+// Tectonic Plates
+let tectonicplates = new L.layerGroup();
+
+// Grabbing plate data fron github url
+d3.json("https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json")
+.then(function(plateData){
+
+    // Printing Data to console making sure is loaded
+    // console.log(plateData);
+
+    // Load data using GeoJSON
+    L.geoJson(plateData, {
+       color: "brown",
+       weight : 5
+    }).addTo(tectonicplates);
+
+});
+
+tectonicplates.addTo(myMap);
+
 let overlays = {
-    "Earthquakes" : earthquakes
+    "Earthquakes" : earthquakes,
+    "Tectonic Plates" : tectonicplates
 };
 
 // Add control layer to map
